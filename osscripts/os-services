@@ -1,0 +1,76 @@
+# This script is to help stop/start openstack services and reset VM from virsh
+# SweA 2018-02-13
+
+#!/bin/bash
+
+USERNAME=`sudo who am i |awk '{print $1}'`
+tstamp=`date +%d-%m-%Y-%H:%M`
+
+case $1 in
+    stop)
+        puppet agent --disable "$USERNAME:$tstamp: Disabled while using $0 $1 $2 $3" 
+        systemctl stop nova-compute.service
+        systemctl stop neutron-linuxbridge-agent.service
+        ;;
+
+    start)
+        puppet agent --enable 
+        systemctl start nova-compute.service
+        systemctl start neutron-linuxbridge-agent.service
+        ;;
+
+    restart)
+        puppet agent --enable 
+        systemctl restart nova-compute.service
+        systemctl restart neutron-linuxbridge-agent.service
+        ;;
+
+    status)
+		/etc/update-motd.d/50-puppet
+        systemctl status nova-compute.service neutron-linuxbridge-agent.service -n0
+        ;;
+
+	nova-compute-stop)
+       	puppet agent --disable "$USER:`date`" 
+       	systemctl stop nova-compute.service
+       	;;
+
+	nova-compute-start)
+       	puppet agent --enable
+       	systemctl start nova-compute.service
+		;;	
+
+	vm)
+		if [ ! $2 ]; then
+			echo "VM UUID missing"
+			echo "Usage example: os-services vm <UUID> reset|stop|start"
+			exit 1
+		fi
+		case "$3" in
+			reset)
+        		puppet agent --disable "$USERNAME:$tstamp: Disabled while using $0 $1 $2 $3" 
+       			systemctl stop nova-compute.service
+				virsh destroy $2
+				virsh start $2
+       			systemctl start nova-compute.service
+        		systemctl restart neutron-linuxbridge-agent.service
+       			puppet agent --enable 
+				;;	
+			stop)
+        		puppet agent --disable "$USERNAME:$tstamp: Disabled while using $0 $1 $2 $3" 
+       			systemctl stop nova-compute.service
+				virsh destroy $2
+				;;	
+			start)
+       			puppet agent --enable 
+				virsh start $2
+       			systemctl start nova-compute.service
+        		systemctl restart neutron-linuxbridge-agent.service
+				;;
+			esac
+		;;
+    *)
+        echo "Usage: $0 [ stop | start | restart | status | nova-compute-stop | nova-compute-start | vm ]"
+        ;;
+esac
+
