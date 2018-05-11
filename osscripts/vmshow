@@ -1,5 +1,5 @@
 #!/bin/bash
-# 2016-12-01 Sw3
+# 2016-12-01 Sw3-
 
 if [ -z "$1" ];then
   echo "Invalid id $1"
