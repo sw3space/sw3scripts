@@ -1,0 +1,28 @@
+#!/bin/bash
+
+input=$1
+
+if [[ $input =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]]; then
+	echo $input is uuid
+	openstack server show $input -f yaml -c addresses -c name -c project_id -c user_id -c status -c id -c created -c updated -c OS-EXT-SRV-ATTR:hypervisor_hostname -c flavor -c image -c os-extended-volumes:volumes_attached -c security_groups -c key_name |grep -E --color 'id|project_id|user_id|accessIPv4|image|flavor|status|hypervisor_hostname|$' 
+
+	exit 0
+else
+
+ip=$input
+
+if [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	id=`neutron port-list --fixed-ips ip_address=$input -f value -c id | xargs -n1 neutron port-show -f value -c device_id`
+else
+  echo "Invalid input $ip"
+  exit 0
+fi
+#id=`neutron port-list --fixed-ips ip_address=$input -f value -c id | xargs -n1 neutron port-show -f value -c device_id`
+
+	if [ -z "$id" ];then
+		echo $input $id
+		exit 0
+	fi
+
+openstack server show $id -f yaml -c addresses -c name -c project_id -c user_id -c status -c id -c created -c updated -c OS-EXT-SRV-ATTR:hypervisor_hostname -c flavor -c image -c os-extended-volumes:volumes_attached -c security_groups -c key_name |grep -E --color 'id|project_id|user_id|accessIPv4|image|flavor|status|hypervisor_hostname|$'
+fi
