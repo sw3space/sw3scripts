@@ -1,0 +1,60 @@
+#!/bin/bash
+# 20181030: Sw3
+
+tday=`date +%Y%m%d%H%M%S`
+
+IMAGE=ubuntu
+FLAVOR=m2.small
+KEY=sa
+AZ=monash
+SECGROUP=default
+VNAME=swe-$tday
+
+function usage() {
+    cat <<EOF
+Usage: $0
+Flags:
+  -i IMAGE    : Choose Image (Available: Ubuntu or CentOS. Default: Ubuntu)
+  -f FLAVOR   : Choose flavor (Default: m2.small)
+  -k KEY      : Choose key (Default: sa.pem)
+  -s SECGROUP : Choose Security group (Default: default. Repeat for multiple groups)
+  -a AZ       : Choose Availability Zone (Default: monash)
+  -n VNAME    : Name of the VM (Default: swe-timestamp)
+EOF
+    exit 1
+}
+
+while getopts 'i:f:k:s:a:n:h' OPT; do
+    case "${OPT}" in
+        i  ) IMAGE="${OPTARG}" ;;
+        f  ) FLAVOR="${OPTARG}" ;;
+        k  ) KEY="${OPTARG}" ;;
+        s  ) SECGROUP="${OPTARG}" ;;
+        a  ) AZ="${OPTARG}" ;;
+        n  ) VNAME="${OPTARG}" ;;
+        h) usage; exit ;;
+              \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
+        :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+        *  ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+    esac
+    if [ ! $OPT ]; then
+    echo "Missing parameters!"
+    usage
+    exit 1
+fi
+done
+shift $(( OPTIND - 1 ))
+
+if [[ $OS_PROJECT_NAME == "admin" ]];then
+  echo "admin project cannot be used to launch VM instances !"
+  exit 1
+fi
+
+if [ $IMAGE == "centos" ];then
+   IMAGE_ID=$(openstack image list --property owner=28eadf5ad64b42a4929b2fb7df99275c --name 'NeCTAR CentOS 7 x86_64' -c ID -f value)
+ else
+   IMAGE_ID=$(openstack image list --property owner=28eadf5ad64b42a4929b2fb7df99275c --name 'NeCTAR Ubuntu 18.04 LTS (Bionic) amd64' -c ID -f value)
+fi
+
+
+echo "openstack server create --image $IMAGE_ID --flavor $FLAVOR --key-name $KEY --security-group $SECGROUP --availability-zone $AZ $VNAME" |bash -
