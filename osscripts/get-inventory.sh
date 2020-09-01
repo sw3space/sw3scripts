@@ -26,5 +26,6 @@ sysmodel=$(dmidecode -s system-product-name)
 sysmanufacturer=$(dmidecode -s system-manufacturer)
 
 meminfo=$(lsmem |grep "Total online memory" |awk -F":" '{print $2}'|sed 's/ //g')
+hname=$(hostname -s)
 
-echo $sysmanufacturer,$sysmodel,$ncore"[cores]",$ntpc"[thread/core]",$meminfo"[memory]",$ngpu"[gpu]",$gpumodel,$nicspeed,$nicmodel
+echo $hname,$sysmanufacturer"|"$sysmodel"|"$ncore"[cores]""|"$ntpc"[thread/core]""|"$meminfo"[memory]""|"$ngpu"[gpu]""|"$gpumodel"|"$nicspeed"|"$nicmodel
