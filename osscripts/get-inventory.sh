@@ -22,6 +22,7 @@ if [ $detectmulti -lt "1" ];then gpumodel="NOGPU";fi
 collectsysinfo=$(dmidecode -t system > /tmp/`hostname`.sysinfo)
 sysmodel=$(dmidecode -s system-product-name)
 sysmanufacturer=$(dmidecode -s system-manufacturer)
+systemserial=$(dmidecode -s system-serial-number)
 
 meminfo=$(lsmem |grep "Total online memory" |awk -F":" '{print $2}'|sed 's/ //g')
 
@@ -35,5 +36,5 @@ statesriov="enable:$nsriov:$vlansriov"
 fi
 
 hname=$(hostname -s)
-
-echo $sysmanufacturer"|"$sysmodel"|"$ncore"[cores]""|"$ntpc"[thread/core]""|"$meminfo"[memory]""|"$ngpu"[gpu]""|"$gpumodel"|"$statesriov"[sriov]""|"$nicspeed"|"$nicmodel > $hname.inventory
+echo $sysmanufacturer"|"$sysmodel"|"$systemsserial"|"$ncore"[cores]""|"$ntpc"[thread/core]""|"$meminfo"[memory]""|"$ngpu"[gpu]""|"$gpumodel"|"$statesriov"[sriov]""|"$nicspeed"|"$n
+icmodel > $hname.inventory
