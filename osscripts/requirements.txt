@@ -1,0 +1,12 @@
+rust
+python-openstackclient
+python-novaclient
+python-glanceclient
+python-swiftclient
+python-neutronclient
+python-cinderclient
+python-keystoneclient
+python-manilaclient
+python-troveclient
+python-octaviaclient
+python-designateclient
